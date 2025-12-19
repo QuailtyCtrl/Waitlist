@@ -32,6 +32,11 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
     const emailContent = `
 <!DOCTYPE html>
 <html>
@@ -50,7 +55,7 @@ Deno.serve(async (req: Request) => {
 <body>
   <div class="container">
     <div class="header">
-      <div class="brand">ELEVATE</div>
+      <div class="brand">Nervont: Limited Collections</div>
       <p style="color: #999; margin: 0; font-size: 14px;">Your Early Access Awaits</p>
     </div>
     <div class="message">
@@ -70,6 +75,25 @@ Deno.serve(async (req: Request) => {
 </html>
     `;
 
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "verify@nervont.store",
+        to: email,
+        subject: "Your Verification Code",
+        html: emailContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -83,7 +107,7 @@ Deno.serve(async (req: Request) => {
     );
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: "Failed to send email", details: error }),
+      JSON.stringify({ error: "Failed to send email", details: String(error) }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

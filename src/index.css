@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Batman Forever Alternate';
+  src: url('/batmfa__.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Perandory';
+  src: url('/perandory.ttf') format('truetype');
+}
+
+@layer base {
+  h1 {
+    font-family: 'Batman Forever Alternate', sans-serif !important;
+  }
+
+  h2 {
+    font-family: 'Perandory', sans-serif !important;
+  }
+
+  p,h3,h4,h5,h6 {
+    font-family: 'Montserrat', sans-serif !important;
+  }
+}
+
 @layer components {
   .text-balance {
     text-wrap: balance;

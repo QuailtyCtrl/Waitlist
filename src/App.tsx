@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SignupForm } from './components/SignupForm';
 import { VerificationFlow } from './components/VerificationFlow';
 import { SuccessPage } from './components/SuccessPage';
@@ -10,6 +10,18 @@ function App() {
   const [step, setStep] = useState<Step>('signup');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
+
+  useEffect(() => {
+    const titles = ['Offical Waitlist', 'Nervont: Limited Collections'];
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index = (index + 1) % titles.length;
+      document.title = titles[index];
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSignupSuccess = (email: string, phone: string) => {
     setUserEmail(email);
@@ -24,15 +36,15 @@ function App() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <div className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full max-w-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-            <div className="lg:col-span-1 flex flex-col justify-center">
-              <div className="mb-8 lg:mb-0">
-                <h1 className="text-4xl lg:text-5xl font-light tracking-tight mb-4">
-                  ELEVATE
+        <div className="w-full max-w-4xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-20">
+            <div className="lg:col-span-1 flex flex-col">
+              <div>
+                <h1 className="text-5xl">
+                  Nervont
                 </h1>
                 <p className="text-lg text-gray-600 font-light leading-relaxed mb-6">
-                  Premium streetwear. Early access. Exclusive perks.
+                  Luxury Lifestyle. Early Access. Exclusive Perks.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -98,7 +110,7 @@ function App() {
       </div>
 
       <footer className="border-t border-gray-200 py-6 px-4 text-center text-xs text-gray-600">
-        <p>© 2024 ELEVATE. All rights reserved. | Premium Streetwear</p>
+        <p>© 2025 NERVONT APPAREL. All rights reserved. | Nervont LC</p>
       </footer>
     </div>
   );

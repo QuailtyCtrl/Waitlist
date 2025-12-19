@@ -77,6 +77,33 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       const smsCode = generateVerificationCode();
 
       await createWaitlistEntry(email, phone, emailCode, smsCode);
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const phoneWithCountry = phone.replace(/\D/g, '').length === 10
+        ? `+1${phone.replace(/\D/g, '')}`
+        : `+${phone.replace(/\D/g, '')}`;
+
+      await Promise.all([
+        fetch(`${supabaseUrl}/functions/v1/send_email_verification`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${anonKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, code: emailCode }),
+        }),
+        fetch(`${supabaseUrl}/functions/v1/send_sms_verification`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${anonKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ phone: phoneWithCountry, code: smsCode }),
+        }),
+      ]);
+
       setSuccess(true);
       onSuccess(email, phone);
     } catch (err) {
