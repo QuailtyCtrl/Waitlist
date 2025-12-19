@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, LogOut, Crown, Gift, Sparkles } from 'lucide-react';
 import { getUserStats } from '../lib/verification';
+import { Leaderboard } from './Leaderboard';
 
 interface SuccessPageProps {
   email: string;
@@ -117,6 +118,10 @@ export function SuccessPage({ email, onLogout }: SuccessPageProps) {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="border-t border-gray-200 pt-6">
+        <Leaderboard userEmail={email} userPosition={stats.position} />
       </div>
 
       <div className="p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">

@@ -120,7 +120,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         <div className="flex justify-center mb-4">
           <CheckCircle className="w-12 h-12 text-emerald-600" />
         </div>
-        <h3 className="text-xl font-light text-center mb-2">Welcome!</h3>
+        <h3 className="text-xl font-light text-center mb-2">Welcome to ELEVATE</h3>
         <p className="text-gray-600 text-center text-sm">
           Check your email and text message for verification codes. You're almost there!
         </p>

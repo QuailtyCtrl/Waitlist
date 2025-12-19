@@ -15,7 +15,7 @@ function App() {
   const [userPhone, setUserPhone] = useState('');
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('waitlist_user_email');
+    const savedEmail = localStorage.getItem('nervont_user_email');
     if (savedEmail) {
       setUserEmail(savedEmail);
       setStep('success');
@@ -23,7 +23,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const titles = ['Official Waitlist', 'Limited Collections'];
+    const titles = ['Offical Waitlist', 'Nervont: Limited Collections'];
     let index = 0;
 
     const interval = setInterval(() => {
@@ -41,18 +41,18 @@ function App() {
   };
 
   const handleVerificationComplete = () => {
-    localStorage.setItem('waitlist_user_email', userEmail);
+    localStorage.setItem('nervont_user_email', userEmail);
     setStep('success');
   };
 
   const handleLoginSuccess = (email: string) => {
     setUserEmail(email);
-    localStorage.setItem('waitlist_user_email', email);
+    localStorage.setItem('nervont_user_email', email);
     setStep('success');
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('waitlist_user_email');
+    localStorage.removeItem('nervont_user_email');
     setUserEmail('');
     setUserPhone('');
     setStep('signup');
@@ -67,7 +67,7 @@ function App() {
             <div className="lg:col-span-1 flex flex-col">
               <div>
                 <h1 className="text-5xl">
-                  Waitlist
+                  Nervont
                 </h1>
                 <p className="text-lg text-gray-600 font-light leading-relaxed mb-6">
                   Luxury Lifestyle. Early Access. Exclusive Perks.
@@ -159,7 +159,7 @@ function App() {
       </div>
 
       <footer className="border-t border-gray-200 py-6 px-4 text-center text-xs text-gray-600">
-        <p>© 2025 All rights reserved.</p>
+        <p>© 2025 NERVONT APPAREL. All rights reserved. | Nervont LC</p>
       </footer>
     </div>
   );

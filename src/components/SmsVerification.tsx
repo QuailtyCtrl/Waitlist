@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 interface SmsVerificationProps {
@@ -11,34 +11,6 @@ export function SmsVerification({ phone, onVerify }: SmsVerificationProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const handleVerify = async (fullCode?: string) => {
-    const code = fullCode || codes.join('');
-
-    if (code.length !== 6) {
-      setError('Please enter all 6 digits');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const success = await onVerify(code);
-      if (!success) {
-        setError('Invalid verification code');
-        setCodes(['', '', '', '', '', '']);
-        inputRefs.current[0]?.focus();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const fullCode = codes.join('');
-    if (fullCode.length === 6 && !loading) {
-      handleVerify(fullCode);
-    }
-  }, [codes]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -64,6 +36,30 @@ export function SmsVerification({ phone, onVerify }: SmsVerificationProps) {
     const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
     const newCodes = text.split('').concat(['', '', '', '', '', '']).slice(0, 6) as string[];
     setCodes(newCodes);
+    if (text.length === 6) {
+      handleVerify(newCodes.join(''));
+    }
+  };
+
+  const handleVerify = async (fullCode?: string) => {
+    const code = fullCode || codes.join('');
+
+    if (code.length !== 6) {
+      setError('Please enter all 6 digits');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const success = await onVerify(code);
+      if (!success) {
+        setError('Invalid verification code');
+        setCodes(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
