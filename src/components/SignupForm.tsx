@@ -1,0 +1,157 @@
+import { useState } from 'react';
+import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { createWaitlistEntry, checkDuplicateEmail, checkDuplicatePhone, generateVerificationCode } from '../lib/verification';
+
+interface SignupFormProps {
+  onSuccess: (email: string, phone: string) => void;
+}
+
+export function SignupForm({ onSuccess }: SignupFormProps) {
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    return digits.length >= 10;
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    setPhone(formatted);
+    setError('');
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    setError('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!validateEmail(email)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+
+      if (!validatePhone(phone)) {
+        setError('Please enter a valid phone number');
+        setLoading(false);
+        return;
+      }
+
+      const emailExists = await checkDuplicateEmail(email);
+      if (emailExists) {
+        setError('This email is already on the waitlist');
+        setLoading(false);
+        return;
+      }
+
+      const phoneExists = await checkDuplicatePhone(phone);
+      if (phoneExists) {
+        setError('This phone number is already on the waitlist');
+        setLoading(false);
+        return;
+      }
+
+      const emailCode = generateVerificationCode();
+      const smsCode = generateVerificationCode();
+
+      await createWaitlistEntry(email, phone, emailCode, smsCode);
+      setSuccess(true);
+      onSuccess(email, phone);
+    } catch (err) {
+      setError('Failed to sign up. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="animate-fadeIn">
+        <div className="flex justify-center mb-4">
+          <CheckCircle className="w-12 h-12 text-emerald-600" />
+        </div>
+        <h3 className="text-xl font-light text-center mb-2">Welcome to ELEVATE</h3>
+        <p className="text-gray-600 text-center text-sm">
+          Check your email and text message for verification codes. You're almost there!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <label htmlFor="email" className="block text-xs uppercase tracking-widest text-gray-700">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={handleEmailChange}
+          placeholder="your@email.com"
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors text-sm"
+          disabled={loading}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-gray-700">
+          Phone
+        </label>
+        <input
+          id="phone"
+          type="tel"
+          value={phone}
+          onChange={handlePhoneChange}
+          placeholder="(123) 456-7890"
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors text-sm"
+          disabled={loading}
+        />
+      </div>
+
+      {error && (
+        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md animate-slideDown">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3 bg-black text-white text-sm font-medium uppercase tracking-widest hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 group"
+      >
+        {loading ? 'Joining...' : 'Join Waitlist'}
+        {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+      </button>
+
+      <p className="text-center text-xs text-gray-500">
+        We'll send verification codes to both email and phone
+      </p>
+    </form>
+  );
+}
