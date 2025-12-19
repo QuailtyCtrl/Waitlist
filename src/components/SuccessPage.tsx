@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle, LogOut, Crown, Gift, Sparkles } from 'lucide-react';
 import { getUserStats } from '../lib/verification';
 import { Leaderboard } from './Leaderboard';
+import { LoadingSpinner } from './shared/LoadingSpinner';
 
 interface SuccessPageProps {
   email: string;
@@ -28,15 +29,7 @@ export function SuccessPage({ email, onLogout }: SuccessPageProps) {
   }, [email]);
 
   if (loading || !stats) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-          <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-          <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const tierInfo = {

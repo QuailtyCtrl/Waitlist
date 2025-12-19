@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Crown, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getLeaderboard } from '../lib/verification';
+import { LoadingSpinner } from './shared/LoadingSpinner';
 
 interface LeaderboardEntry {
   id: string;
@@ -76,15 +77,7 @@ export function Leaderboard({ userEmail, userPosition }: LeaderboardProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

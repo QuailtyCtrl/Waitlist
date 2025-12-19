@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 import { createWaitlistEntry, checkDuplicateEmail, checkDuplicatePhone, generateVerificationCode } from '../lib/verification';
+import { validateEmail, validatePhone, formatPhone, normalizePhoneForStorage } from '../lib/validation';
+import { ErrorAlert } from './shared/ErrorAlert';
 
 interface SignupFormProps {
   onSuccess: (email: string, phone: string) => void;
@@ -12,23 +14,6 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const validatePhone = (phone: string) => {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length >= 10;
-  };
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhone(e.target.value);
@@ -81,9 +66,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      const phoneWithCountry = phone.replace(/\D/g, '').length === 10
-        ? `+1${phone.replace(/\D/g, '')}`
-        : `+${phone.replace(/\D/g, '')}`;
+      const phoneWithCountry = normalizePhoneForStorage(phone);
 
       await Promise.all([
         fetch(`${supabaseUrl}/functions/v1/send_email_verification`, {
@@ -108,7 +91,6 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       onSuccess(email, phone);
     } catch (err) {
       setError('Failed to sign up. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -160,12 +142,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         />
       </div>
 
-      {error && (
-        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md animate-slideDown">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
+      <ErrorAlert message={error} />
 
       <button
         type="submit"
