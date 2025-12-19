@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { LogIn, Mail } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { AlertCircle, LogIn, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateVerificationCode, verifyEmailCode } from '../lib/verification';
-import { CodeInput } from './shared/CodeInput';
-import { ErrorAlert } from './shared/ErrorAlert';
 
 interface LoginFormProps {
   onSuccess: (email: string) => void;
@@ -12,8 +10,10 @@ interface LoginFormProps {
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const [step, setStep] = useState<'email' | 'verify'>('email');
   const [email, setEmail] = useState('');
+  const [codes, setCodes] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +71,38 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     }
   };
 
-  const handleVerify = async (code: string) => {
+  const handleCodeChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newCodes = [...codes];
+    newCodes[index] = value.slice(-1);
+    setCodes(newCodes);
+    setError('');
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !codes[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const newCodes = text.split('').concat(['', '', '', '', '', '']).slice(0, 6) as string[];
+    setCodes(newCodes);
+    if (text.length === 6) {
+      handleVerify(newCodes.join(''));
+    }
+  };
+
+  const handleVerify = async (fullCode?: string) => {
+    const code = fullCode || codes.join('');
+
     if (code.length !== 6) {
       setError('Please enter all 6 digits');
       return;
@@ -84,6 +115,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         onSuccess(email);
       } else {
         setError('Invalid verification code');
+        setCodes(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
     } finally {
       setLoading(false);
@@ -101,21 +134,37 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             We sent a 6-digit code to {email}
           </p>
 
-          <div className="mb-4">
-            <CodeInput
-              onComplete={handleVerify}
-              loading={loading}
-              error={error}
-              onErrorChange={setError}
-            />
+          <div className="flex gap-2 mb-4" onPaste={handlePaste}>
+            {codes.map((code, index) => (
+              <input
+                key={index}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={code}
+                onChange={(e) => handleCodeChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="w-10 h-12 text-center text-lg font-semibold border border-gray-300 rounded focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                disabled={loading}
+                placeholder="-"
+              />
+            ))}
           </div>
 
-          <ErrorAlert message={error} />
+          {error && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded mb-4 animate-slideDown">
+              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           <button
-            onClick={() => handleVerify('')}
-            disabled={loading}
-            className="w-full py-2 bg-black text-white text-sm font-medium uppercase tracking-widest hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors mt-4"
+            onClick={() => handleVerify()}
+            disabled={loading || codes.join('').length !== 6}
+            className="w-full py-2 bg-black text-white text-sm font-medium uppercase tracking-widest hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Verifying...' : 'Login'}
           </button>
@@ -123,6 +172,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           <button
             onClick={() => {
               setStep('email');
+              setCodes(['', '', '', '', '', '']);
               setError('');
             }}
             className="w-full mt-2 py-2 text-sm text-gray-600 hover:text-black transition-colors"
@@ -155,7 +205,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </div>
       </div>
 
-      <ErrorAlert message={error} />
+      {error && (
+        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded animate-slideDown">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
 
       <button
         type="submit"

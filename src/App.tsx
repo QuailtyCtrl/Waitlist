@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { SignupForm } from './components/SignupForm';
 import { LoginForm } from './components/LoginForm';
+import { AdminLogin } from './components/AdminLogin';
 import { VerificationFlow } from './components/VerificationFlow';
 import { SuccessPage } from './components/SuccessPage';
+import { Leaderboard } from './components/Leaderboard';
 
 type Step = 'signup' | 'verification' | 'success';
-type Mode = 'signup' | 'login';
+type Mode = 'signup' | 'login' | 'admin';
 
 function App() {
   const [step, setStep] = useState<Step>('signup');
@@ -118,15 +120,28 @@ function App() {
                   <div className="animate-fadeIn">
                     <h2 className="text-2xl font-light mb-6">Welcome Back</h2>
                     <LoginForm onSuccess={handleLoginSuccess} />
-                    <div className="mt-4 text-center">
+                    <div className="mt-4 text-center space-y-2">
                       <button
                         onClick={() => setMode('signup')}
-                        className="text-sm text-gray-600 hover:text-black transition-colors"
+                        className="text-sm text-gray-600 hover:text-black transition-colors block w-full"
                       >
                         Need to sign up? <span className="underline">Join here</span>
                       </button>
+                      <button
+                        onClick={() => setMode('admin')}
+                        className="text-sm text-gray-600 hover:text-black transition-colors block w-full"
+                      >
+                        Admin? <span className="underline">Login here</span>
+                      </button>
                     </div>
                   </div>
+                )}
+
+                {step === 'signup' && mode === 'admin' && (
+                  <AdminLogin
+                    onSuccess={handleLoginSuccess}
+                    onBack={() => setMode('login')}
+                  />
                 )}
 
                 {step === 'verification' && (
@@ -146,6 +161,12 @@ function App() {
                   </div>
                 )}
               </div>
+
+              {step === 'success' && (
+                <div className="bg-gray-50 rounded border border-gray-200 p-6 animate-slideUp">
+                  <Leaderboard userEmail={userEmail} />
+                </div>
+              )}
             </div>
           </div>
         </div>

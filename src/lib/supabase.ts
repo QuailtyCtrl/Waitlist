@@ -19,6 +19,7 @@ export interface WaitlistEntry {
   referral_code: string;
   referral_count: number;
   referred_by_code: string | null;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
