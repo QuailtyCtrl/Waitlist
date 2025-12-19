@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Batman Forever Alternate';
+  src: url('/batmfa__.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Perandory';
+  src: url('/perandory.ttf') format('truetype');
+}
+
+@layer base {
+  h1 {
+    font-family: 'Batman Forever Alternate', sans-serif !important;
+  }
+
+  h2 {
+    font-family: 'Perandory', sans-serif !important;
+  }
+
+  p,h3,h4,h5,h6 {
+    font-family: 'Montserrat', sans-serif !important;
+  }
+}
+
+@layer components {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.5s ease-out;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.6s ease-out;
+  }
+
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+}
