@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'Perandory';
-  src: url('/perandory.ttf') format('truetype');
+  src: url('/perandory-regular.otf') format('opentype');
 }
 
 @layer base {
