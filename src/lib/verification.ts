@@ -434,3 +434,93 @@ export async function getUserByEmail(email: string) {
 
   return data;
 }
+
+export async function sendLoginCode(email: string): Promise<{ success: boolean; message: string }> {
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    return { success: false, message: 'Email not found' };
+  }
+
+  const newCode = generateVerificationCode();
+  const now = new Date();
+  const expiresIn15Min = new Date(now.getTime() + 15 * 60000);
+
+  const { error: updateError } = await supabase
+    .from('waitlist')
+    .update({
+      email_verification_code: newCode,
+      email_verification_code_expires_at: expiresIn15Min.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq('email', email.toLowerCase());
+
+  if (updateError) {
+    return { success: false, message: 'Failed to generate login code' };
+  }
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send_email_verification`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: email.toLowerCase(), code: newCode }),
+      }
+    );
+
+    if (!response.ok) {
+      return { success: false, message: 'Failed to send login code' };
+    }
+
+    return { success: true, message: 'Login code sent to your email' };
+  } catch (err) {
+    return { success: false, message: 'Failed to send login code' };
+  }
+}
+
+export async function verifyLoginCode(
+  email: string,
+  code: string
+): Promise<{ success: boolean; message: string }> {
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select('email_verification_code, email_verification_code_expires_at')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, message: 'Email not found' };
+  }
+
+  if (!data.email_verification_code) {
+    return { success: false, message: 'No verification code found' };
+  }
+
+  const expiresAt = new Date(data.email_verification_code_expires_at);
+  if (expiresAt < new Date()) {
+    return { success: false, message: 'Login code has expired' };
+  }
+
+  if (data.email_verification_code !== code) {
+    return { success: false, message: 'Invalid login code' };
+  }
+
+  const { error: updateError } = await supabase
+    .from('waitlist')
+    .update({
+      email_verification_code: null,
+      email_verification_code_expires_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('email', email.toLowerCase());
+
+  if (updateError) {
+    return { success: false, message: 'Failed to verify login code' };
+  }
+
+  return { success: true, message: 'Login successful' };
+}

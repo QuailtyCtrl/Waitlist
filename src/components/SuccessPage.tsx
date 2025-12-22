@@ -65,7 +65,7 @@ export function SuccessPage({ email }: SuccessPageProps) {
           </div>
         </div>
         <h2 className="text-2xl font-light">You're In!</h2>
-        <p className="text-gray-600">Welcome to the Nervont early access program.</p>
+        <p className="text-gray-600">Welcome to the <span className="brand-nervont">Nervont</span> early access program.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 py-6 px-4 bg-gray-50 rounded border border-gray-200">
@@ -75,7 +75,7 @@ export function SuccessPage({ email }: SuccessPageProps) {
         </div>
         <div className="text-center border-l border-r border-gray-300">
           <p className="text-gray-600 text-xs mb-1">Tier</p>
-          <p className="text-lg font-medium">{currentTier.title}</p>
+          <p className={`text-lg tier-${stats.tier}`}>{currentTier.title}</p>
         </div>
         <div className="text-center">
           <p className="text-gray-600 text-xs mb-1">Referrals</p>
@@ -84,7 +84,7 @@ export function SuccessPage({ email }: SuccessPageProps) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Your {currentTier.title} Benefits</h3>
+        <h3 className="text-sm font-medium text-gray-900">Your <span className={`tier-${stats.tier}`}>{currentTier.title}</span> Benefits</h3>
         <div className="space-y-2">
           {currentTier.perks.map((perk, i) => (
             <div

@@ -136,7 +136,10 @@ export function Leaderboard({ userEmail, userPosition }: LeaderboardProps) {
                       <span>{entry.referral_count}</span>
                     </div>
                   )}
-                  <span className="text-lg">{badge}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs tier-${entry.tier} capitalize`}>{entry.tier}</span>
+                    <span className="text-lg">{badge}</span>
+                  </div>
                 </div>
               </div>
             </div>

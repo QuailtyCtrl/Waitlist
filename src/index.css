@@ -30,6 +30,42 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .brand-nervont {
+    font-family: 'Batman Forever Alternate', sans-serif;
+  }
+
+  .tier-bronze {
+    background: linear-gradient(135deg, #8B4513 0%, #CD853F 50%, #8B4513 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+
+  .tier-silver {
+    background: linear-gradient(135deg, #A8A8A8 0%, #E8E8E8 50%, #A8A8A8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+
+  .tier-gold {
+    background: linear-gradient(135deg, #B8860B 0%, #FFD700 50%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+
+  .tier-platinum {
+    background: linear-gradient(135deg, #C0C0C0 0%, #F8F8FF 50%, #C0C0C0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
 }
 
 @layer utilities {
