@@ -174,7 +174,7 @@ async function getUserPosition(email: string): Promise<number | null> {
   const { count } = await supabase
     .from('waitlist')
     .select('id', { count: 'exact' })
-    .lt('created_at', data.created_at);
+    .gt('created_at', data.created_at);
 
   return (count || 0) + 1;
 }
@@ -216,7 +216,7 @@ export async function recalculateTop10Tiers() {
   const { data: top15 } = await supabase
     .from('waitlist')
     .select('email, email_verified, sms_verified, referral_count')
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(15);
 
   if (!top15) return;
@@ -249,7 +249,7 @@ export async function getLeaderboard(limit: number = 50) {
       'id, email, tier, referral_count, created_at',
       { count: 'exact' }
     )
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (error) throw error;
@@ -272,7 +272,7 @@ export async function getUserStats(email: string) {
   const { count } = await supabase
     .from('waitlist')
     .select('id', { count: 'exact' })
-    .lt('created_at', data.created_at);
+    .gt('created_at', data.created_at);
 
   return {
     ...data,
