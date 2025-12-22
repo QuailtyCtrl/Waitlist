@@ -48,7 +48,7 @@ export function LoginForm({ onLoginSuccess, onBackToSignup }: LoginFormProps) {
 
   return (
     <div className="animate-fadeIn">
-      <h2 className="text-2xl font-light mb-6">Welcome Back. . .</h2>
+      <h2 className="text-2xl font-light mb-6">Welcome Back . . .</h2>
       <form onSubmit={handleSubmit} className="space-y-4"> 
         <div className="space-y-2">
           <label htmlFor="email" className="block text-xs uppercase tracking-widest text-gray-700">
