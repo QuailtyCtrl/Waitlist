@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, Copy, Share2, Crown, Gift, Zap } from 'lucide-react';
 import { getUserStats } from '../lib/verification';
-import { Leaderboard } from './Leaderboard';
 
 interface SuccessPageProps {
   email: string;
@@ -122,10 +121,6 @@ export function SuccessPage({ email }: SuccessPageProps) {
              'You\'ve reached Platinum! 🎉'}
           </p>
         </div>
-      </div>
-
-      <div className="border-t border-gray-200 pt-6">
-        <Leaderboard userEmail={email} userPosition={stats.position} />
       </div>
 
       <div className="p-4 bg-gray-50 rounded border border-gray-200 space-y-2">
