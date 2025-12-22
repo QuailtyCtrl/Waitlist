@@ -3,7 +3,6 @@ import { SignupForm } from './components/SignupForm';
 import { LoginForm } from './components/LoginForm';
 import { VerificationFlow } from './components/VerificationFlow';
 import { SuccessPage } from './components/SuccessPage';
-import { Leaderboard } from './components/Leaderboard';
 
 type Step = 'signup' | 'login' | 'verification' | 'success';
 
@@ -125,12 +124,6 @@ function App() {
                   </div>
                 )}
               </div>
-
-              {step === 'success' && (
-                <div className="bg-gray-50 rounded border border-gray-200 p-6 animate-slideUp">
-                  <Leaderboard userEmail={userEmail} />
-                </div>
-              )}
             </div>
           </div>
         </div>

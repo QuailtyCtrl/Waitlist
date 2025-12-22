@@ -107,22 +107,33 @@ export function Leaderboard({ userEmail, userPosition }: LeaderboardProps) {
           const colors = tierColors[entry.tier];
           const badge = tierBadges[entry.tier];
           const isUserEntry = userEmail && entry.email.toLowerCase() === userEmail.toLowerCase();
+          const isTop5 = index < 5;
 
           return (
             <div
               key={entry.id}
-              className={`p-3 rounded border transition-all ${colors.bg} ${colors.border} ${
-                isUserEntry ? 'border-2 border-black bg-gray-50' : 'border'
+              className={`p-3 rounded border transition-all ${
+                isTop5
+                  ? 'bg-gradient-to-r from-yellow-50 via-amber-50 to-yellow-50 border-yellow-300 shadow-md'
+                  : `${colors.bg} ${colors.border}`
+              } ${
+                isUserEntry ? 'border-2 border-black' : 'border'
               } animate-slideDown`}
               style={{ animationDelay: `${index * 0.05}s` }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="text-lg font-light text-gray-600 w-8 text-right">
-                    {index + 1 === 1 ? <Crown className="w-5 h-5 text-yellow-600" /> : `#${index + 1}`}
+                  <div className="text-lg font-light w-8 text-right">
+                    {index + 1 === 1 ? (
+                      <Crown className="w-5 h-5 text-yellow-600" />
+                    ) : isTop5 ? (
+                      <span className="text-yellow-700 font-bold">#{index + 1}</span>
+                    ) : (
+                      <span className="text-gray-600">#{index + 1}</span>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className={`text-sm font-medium truncate ${isTop5 ? 'text-gray-900' : 'text-gray-900'}`}>
                       {entry.email.split('@')[0]}
                     </p>
                     <p className="text-xs text-gray-600">Joined recently</p>
@@ -131,7 +142,7 @@ export function Leaderboard({ userEmail, userPosition }: LeaderboardProps) {
 
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {entry.referral_count > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-gray-700">
+                    <div className={`flex items-center gap-1 text-xs ${isTop5 ? 'text-yellow-700' : 'text-gray-700'}`}>
                       <Zap className="w-3 h-3" />
                       <span>{entry.referral_count}</span>
                     </div>
