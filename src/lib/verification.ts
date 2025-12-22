@@ -110,6 +110,8 @@ export async function verifyEmailCode(
     return { success: false, message: 'Failed to update verification status' };
   }
 
+  await updateTierBasedOnVerification(email);
+
   return { success: true, message: 'Email verified successfully' };
 }
 
@@ -120,7 +122,7 @@ export async function verifySmsCode(
   const normalizedPhone = normalizePhone(phone);
   const { data, error } = await supabase
     .from('waitlist')
-    .select('sms_verification_code, sms_verification_code_expires_at')
+    .select('email, sms_verification_code, sms_verification_code_expires_at')
     .eq('phone', normalizedPhone)
     .maybeSingle();
 
@@ -155,13 +157,37 @@ export async function verifySmsCode(
     return { success: false, message: 'Failed to update verification status' };
   }
 
+  await updateTierBasedOnVerification(data.email);
+
   return { success: true, message: 'SMS verified successfully' };
 }
 
-export async function updateTierBasedOnVerification(email: string, skipSms: boolean = false) {
+async function getUserPosition(email: string): Promise<number | null> {
   const { data } = await supabase
     .from('waitlist')
-    .select('email_verified, sms_verified, referral_count, phone')
+    .select('created_at')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+
+  if (!data) return null;
+
+  const { count } = await supabase
+    .from('waitlist')
+    .select('id', { count: 'exact' })
+    .lt('created_at', data.created_at);
+
+  return (count || 0) + 1;
+}
+
+async function isInTop10(email: string): Promise<boolean> {
+  const position = await getUserPosition(email);
+  return position !== null && position <= 10;
+}
+
+export async function updateTierBasedOnVerification(email: string) {
+  const { data } = await supabase
+    .from('waitlist')
+    .select('email_verified, sms_verified, referral_count')
     .eq('email', email.toLowerCase())
     .maybeSingle();
 
@@ -169,28 +195,51 @@ export async function updateTierBasedOnVerification(email: string, skipSms: bool
 
   let tier: 'bronze' | 'silver' | 'gold' | 'platinum' = 'bronze';
 
-  const hasPhone = data.phone && data.phone.trim() !== '';
-  const emailVerified = data.email_verified;
-  const smsVerified = data.sms_verified;
-
-  if (emailVerified && (smsVerified || skipSms || !hasPhone)) {
-    if (data.referral_count >= 10) {
-      tier = 'platinum';
-    } else if (data.referral_count >= 5) {
-      tier = 'gold';
-    } else if (data.referral_count >= 2) {
-      tier = 'silver';
-    } else {
-      tier = 'gold';
-    }
-  } else if (emailVerified || smsVerified) {
+  const inTop10 = await isInTop10(email);
+  if (inTop10) {
+    tier = 'platinum';
+  } else if (data.referral_count >= 1) {
+    tier = 'gold';
+  } else if (data.email_verified && data.sms_verified) {
     tier = 'silver';
+  } else if (data.email_verified) {
+    tier = 'bronze';
   }
 
   await supabase
     .from('waitlist')
     .update({ tier, updated_at: new Date().toISOString() })
     .eq('email', email.toLowerCase());
+}
+
+export async function recalculateTop10Tiers() {
+  const { data: top15 } = await supabase
+    .from('waitlist')
+    .select('email, email_verified, sms_verified, referral_count')
+    .order('created_at', { ascending: true })
+    .limit(15);
+
+  if (!top15) return;
+
+  for (let i = 0; i < top15.length; i++) {
+    const user = top15[i];
+    let tier: 'bronze' | 'silver' | 'gold' | 'platinum' = 'bronze';
+
+    if (i < 10) {
+      tier = 'platinum';
+    } else if (user.referral_count >= 1) {
+      tier = 'gold';
+    } else if (user.email_verified && user.sms_verified) {
+      tier = 'silver';
+    } else if (user.email_verified) {
+      tier = 'bronze';
+    }
+
+    await supabase
+      .from('waitlist')
+      .update({ tier, updated_at: new Date().toISOString() })
+      .eq('email', user.email.toLowerCase());
+  }
 }
 
 export async function getLeaderboard(limit: number = 50) {

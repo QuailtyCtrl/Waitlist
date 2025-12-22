@@ -19,7 +19,7 @@ export function VerificationFlow({ email, phone, onComplete }: VerificationFlowP
   useEffect(() => {
     if (emailVerified && (smsVerified || !hasPhone)) {
       setLoading(true);
-      updateTierBasedOnVerification(email, !hasPhone).then(() => {
+      updateTierBasedOnVerification(email).then(() => {
         setTimeout(() => {
           onComplete();
         }, 1000);
@@ -47,7 +47,7 @@ export function VerificationFlow({ email, phone, onComplete }: VerificationFlowP
 
   const handleSkipSms = () => {
     setLoading(true);
-    updateTierBasedOnVerification(email, true).then(() => {
+    updateTierBasedOnVerification(email).then(() => {
       setTimeout(() => {
         onComplete();
       }, 1000);
