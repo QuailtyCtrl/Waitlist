@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
-import { createWaitlistEntry, checkDuplicateEmail, checkDuplicatePhone, generateVerificationCode } from '../lib/verification';
+import { createWaitlistEntry, checkDuplicateEmail, checkDuplicatePhone, generateVerificationCode, normalizePhone } from '../lib/verification';
 
 interface SignupFormProps {
   onSuccess: (email: string, phone: string) => void;
@@ -81,9 +81,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      const phoneWithCountry = phone.replace(/\D/g, '').length === 10
-        ? `+1${phone.replace(/\D/g, '')}`
-        : `+${phone.replace(/\D/g, '')}`;
+      const normalizedPhone = normalizePhone(phone);
 
       const [emailResponse, smsResponse] = await Promise.all([
         fetch(`${supabaseUrl}/functions/v1/send_email_verification`, {
@@ -100,7 +98,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
             'Authorization': `Bearer ${anonKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ phone: phoneWithCountry, code: smsCode }),
+          body: JSON.stringify({ phone: normalizedPhone, code: smsCode }),
         }),
       ]);
 

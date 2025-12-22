@@ -8,6 +8,17 @@ export function generateReferralCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+export function normalizePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+  if (digits.length === 11 && digits.startsWith('1')) {
+    return `+${digits}`;
+  }
+  return `+${digits}`;
+}
+
 export async function checkDuplicateEmail(email: string): Promise<boolean> {
   const { data } = await supabase
     .from('waitlist')
@@ -18,10 +29,11 @@ export async function checkDuplicateEmail(email: string): Promise<boolean> {
 }
 
 export async function checkDuplicatePhone(phone: string): Promise<boolean> {
+  const normalizedPhone = normalizePhone(phone);
   const { data } = await supabase
     .from('waitlist')
     .select('id')
-    .eq('phone', phone)
+    .eq('phone', normalizedPhone)
     .maybeSingle();
   return !!data;
 }
@@ -34,6 +46,7 @@ export async function createWaitlistEntry(
   referredByCode?: string
 ) {
   const referralCode = generateReferralCode();
+  const normalizedPhone = normalizePhone(phone);
   const now = new Date();
   const expiresIn15Min = new Date(now.getTime() + 15 * 60000);
 
@@ -41,7 +54,7 @@ export async function createWaitlistEntry(
     .from('waitlist')
     .insert({
       email: email.toLowerCase(),
-      phone,
+      phone: normalizedPhone,
       email_verification_code: emailCode,
       email_verification_code_expires_at: expiresIn15Min.toISOString(),
       sms_verification_code: smsCode,
@@ -104,10 +117,11 @@ export async function verifySmsCode(
   phone: string,
   code: string
 ): Promise<{ success: boolean; message: string }> {
+  const normalizedPhone = normalizePhone(phone);
   const { data, error } = await supabase
     .from('waitlist')
     .select('sms_verification_code, sms_verification_code_expires_at')
-    .eq('phone', phone)
+    .eq('phone', normalizedPhone)
     .maybeSingle();
 
   if (error || !data) {
@@ -135,7 +149,7 @@ export async function verifySmsCode(
       sms_verification_code_expires_at: null,
       updated_at: new Date().toISOString(),
     })
-    .eq('phone', phone);
+    .eq('phone', normalizedPhone);
 
   if (updateError) {
     return { success: false, message: 'Failed to update verification status' };
