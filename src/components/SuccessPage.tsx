@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, Copy, Share2, Crown, Gift, Zap } from 'lucide-react';
+import { CheckCircle, Copy, Lock } from 'lucide-react';
 import { getUserStats } from '../lib/verification';
-import { Leaderboard } from './Leaderboard';
 
 interface SuccessPageProps {
   email: string;
@@ -46,11 +45,22 @@ export function SuccessPage({ email }: SuccessPageProps) {
     );
   }
 
+  const allBenefits = [
+    { name: 'Early access', requiredTier: 'bronze' },
+    { name: 'Exclusive drops', requiredTier: 'silver' },
+    { name: '20% discount', requiredTier: 'gold' },
+    { name: 'VIP events', requiredTier: 'platinum' },
+    { name: 'Personal stylist', requiredTier: 'platinum' },
+  ];
+
+  const tierHierarchy = { bronze: 1, silver: 2, gold: 3, platinum: 4 };
+  const currentTierLevel = tierHierarchy[stats.tier];
+
   const tierInfo = {
-    bronze: { title: 'Bronze', perks: ['Early access', 'Exclusive drops'] },
-    silver: { title: 'Silver', perks: ['Early access', 'Exclusive drops', '10% discount'] },
-    gold: { title: 'Gold', perks: ['Early access', 'Exclusive drops', '15% discount', 'VIP events'] },
-    platinum: { title: 'Platinum', perks: ['Early access', 'Exclusive drops', '20% discount', 'VIP events', 'Personal stylist'] },
+    bronze: { title: 'Bronze' },
+    silver: { title: 'Silver' },
+    gold: { title: 'Gold' },
+    platinum: { title: 'Platinum' },
   };
 
   const currentTier = tierInfo[stats.tier];
@@ -86,16 +96,29 @@ export function SuccessPage({ email }: SuccessPageProps) {
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-gray-900">Your <span className={`tier-${stats.tier}`}>{currentTier.title}</span> Benefits</h3>
         <div className="space-y-2">
-          {currentTier.perks.map((perk, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 p-3 bg-gray-50 rounded border border-gray-200 animate-slideDown"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <Gift className="w-4 h-4 text-gray-600 flex-shrink-0" />
-              <span className="text-sm text-gray-700">{perk}</span>
-            </div>
-          ))}
+          {allBenefits.map((benefit, i) => {
+            const isUnlocked = currentTierLevel >= tierHierarchy[benefit.requiredTier];
+            return (
+              <div
+                key={i}
+                className={`flex items-center gap-3 p-3 rounded border animate-slideDown ${
+                  isUnlocked
+                    ? 'bg-emerald-50 border-emerald-200'
+                    : 'bg-gray-50 border-gray-200 opacity-60'
+                }`}
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {isUnlocked ? (
+                  <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                ) : (
+                  <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                )}
+                <span className={`text-sm ${isUnlocked ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                  {benefit.name}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -116,16 +139,12 @@ export function SuccessPage({ email }: SuccessPageProps) {
         <div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 space-y-1">
           <p className="font-medium">Referral Progress</p>
           <p>
-            {stats.referral_count < 2 ? `${2 - stats.referral_count} more referrals to reach Silver` :
-             stats.referral_count < 5 ? `${5 - stats.referral_count} more referrals to reach Gold` :
-             stats.referral_count < 10 ? `${10 - stats.referral_count} more referrals to reach Platinum` :
-             'You\'ve reached Platinum! 🎉'}
+            {stats.tier === 'bronze' ? 'Get verified via SMS to unlock Silver tier' :
+             stats.tier === 'silver' ? '1 more referral to reach Gold' :
+             stats.tier === 'gold' ? 'Climb to top 10 to reach Platinum' :
+             'You\'ve reached Platinum!'}
           </p>
         </div>
-      </div>
-
-      <div className="border-t border-gray-200 pt-6">
-        <Leaderboard userEmail={email} userPosition={stats.position} />
       </div>
 
       <div className="p-4 bg-gray-50 rounded border border-gray-200 space-y-2">
