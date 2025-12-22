@@ -53,7 +53,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         return;
       }
 
-      if (!validatePhone(phone)) {
+      if (phone && !validatePhone(phone)) {
         setError('Please enter a valid phone number');
         setLoading(false);
         return;
@@ -66,11 +66,13 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         return;
       }
 
-      const phoneExists = await checkDuplicatePhone(phone);
-      if (phoneExists) {
-        setError('This phone number is already on the waitlist');
-        setLoading(false);
-        return;
+      if (phone) {
+        const phoneExists = await checkDuplicatePhone(phone);
+        if (phoneExists) {
+          setError('This phone number is already on the waitlist');
+          setLoading(false);
+          return;
+        }
       }
 
       const emailCode = generateVerificationCode();
@@ -81,9 +83,9 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      const normalizedPhone = normalizePhone(phone);
+      const normalizedPhone = phone ? normalizePhone(phone) : '';
 
-      const [emailResponse, smsResponse] = await Promise.all([
+      const requests = [
         fetch(`${supabaseUrl}/functions/v1/send_email_verification`, {
           method: 'POST',
           headers: {
@@ -92,21 +94,29 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           },
           body: JSON.stringify({ email, code: emailCode }),
         }),
-        fetch(`${supabaseUrl}/functions/v1/send_sms_verification`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${anonKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ phone: normalizedPhone, code: smsCode }),
-        }),
-      ]);
+      ];
 
-      if (!emailResponse.ok || !smsResponse.ok) {
-        console.error('Verification service error:', {
-          email: !emailResponse.ok ? await emailResponse.text() : 'ok',
-          sms: !smsResponse.ok ? await smsResponse.text() : 'ok',
-        });
+      if (phone) {
+        requests.push(
+          fetch(`${supabaseUrl}/functions/v1/send_sms_verification`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${anonKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone: normalizedPhone, code: smsCode }),
+          })
+        );
+      }
+
+      const responses = await Promise.all(requests);
+
+      if (responses.some(r => !r.ok)) {
+        console.error('Verification service error:', await Promise.all(
+          responses.map(async (r, i) =>
+            !r.ok ? await r.text() : 'ok'
+          )
+        ));
       }
 
       setSuccess(true);
@@ -127,7 +137,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         </div>
         <h3 className="text-xl font-light text-center mb-2">Welcome to ELEVATE</h3>
         <p className="text-gray-600 text-center text-sm">
-          Check your email and text message for verification codes. You're almost there!
+          Check your email{phone ? ' and text message' : ''} for verification code{phone ? 's' : ''}. You're almost there!
         </p>
       </div>
     );
@@ -152,7 +162,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
       <div className="space-y-2">
         <label htmlFor="phone" className="block text-xs uppercase tracking-widest text-gray-700">
-          Phone
+          Phone <span className="text-gray-400">(Optional)</span>
         </label>
         <input
           id="phone"
@@ -182,7 +192,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       </button>
 
       <p className="text-center text-xs text-gray-500">
-        We'll send verification codes to both email and phone
+        We'll send a verification code to your email{phone ? ' and phone' : ''}
       </p>
     </form>
   );

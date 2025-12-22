@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { SignupForm } from './components/SignupForm';
+import { LoginForm } from './components/LoginForm';
 import { VerificationFlow } from './components/VerificationFlow';
 import { SuccessPage } from './components/SuccessPage';
 import { Leaderboard } from './components/Leaderboard';
 
-type Step = 'signup' | 'verification' | 'success';
+type Step = 'signup' | 'login' | 'verification' | 'success';
 
 function App() {
   const [step, setStep] = useState<Step>('signup');
@@ -27,6 +28,19 @@ function App() {
     setUserEmail(email);
     setUserPhone(phone);
     setStep('verification');
+  };
+
+  const handleLoginSuccess = (email: string, phone: string, emailVerified: boolean, smsVerified: boolean) => {
+    setUserEmail(email);
+    setUserPhone(phone);
+
+    const hasPhone = phone && phone.trim() !== '';
+
+    if (emailVerified && (smsVerified || !hasPhone)) {
+      setStep('success');
+    } else {
+      setStep('verification');
+    }
   };
 
   const handleVerificationComplete = () => {
@@ -78,7 +92,20 @@ function App() {
                   <div className="animate-fadeIn">
                     <h2 className="text-2xl font-light mb-6">Join the Waitlist</h2>
                     <SignupForm onSuccess={handleSignupSuccess} />
+                    <button
+                      onClick={() => setStep('login')}
+                      className="w-full mt-4 text-center text-sm text-gray-600 hover:text-black transition-colors"
+                    >
+                      Already joined? Log in
+                    </button>
                   </div>
+                )}
+
+                {step === 'login' && (
+                  <LoginForm
+                    onLoginSuccess={handleLoginSuccess}
+                    onBackToSignup={() => setStep('signup')}
+                  />
                 )}
 
                 {step === 'verification' && (

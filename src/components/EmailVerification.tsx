@@ -149,10 +149,10 @@ export function EmailVerification({ email, onVerify }: EmailVerificationProps) {
         <button
           onClick={handleResend}
           disabled={resending || cooldown > 0}
-          className="w-full py-2 mt-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium uppercase tracking-widest hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-3 text-xs text-gray-500 hover:text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
         >
-          <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
-          {resending ? 'Resending...' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend Code'}
+          <RefreshCw className={`w-3 h-3 ${resending ? 'animate-spin' : ''}`} />
+          {resending ? 'resending...' : cooldown > 0 ? `resend in ${cooldown}s` : 'resend code'}
         </button>
       </div>
     </div>

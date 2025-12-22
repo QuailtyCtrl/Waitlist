@@ -158,10 +158,10 @@ export async function verifySmsCode(
   return { success: true, message: 'SMS verified successfully' };
 }
 
-export async function updateTierBasedOnVerification(email: string) {
+export async function updateTierBasedOnVerification(email: string, skipSms: boolean = false) {
   const { data } = await supabase
     .from('waitlist')
-    .select('email_verified, sms_verified, referral_count')
+    .select('email_verified, sms_verified, referral_count, phone')
     .eq('email', email.toLowerCase())
     .maybeSingle();
 
@@ -169,7 +169,11 @@ export async function updateTierBasedOnVerification(email: string) {
 
   let tier: 'bronze' | 'silver' | 'gold' | 'platinum' = 'bronze';
 
-  if (data.email_verified && data.sms_verified) {
+  const hasPhone = data.phone && data.phone.trim() !== '';
+  const emailVerified = data.email_verified;
+  const smsVerified = data.sms_verified;
+
+  if (emailVerified && (smsVerified || skipSms || !hasPhone)) {
     if (data.referral_count >= 10) {
       tier = 'platinum';
     } else if (data.referral_count >= 5) {
@@ -179,7 +183,7 @@ export async function updateTierBasedOnVerification(email: string) {
     } else {
       tier = 'gold';
     }
-  } else if (data.email_verified || data.sms_verified) {
+  } else if (emailVerified || smsVerified) {
     tier = 'silver';
   }
 
@@ -366,4 +370,18 @@ export async function resendSmsCode(
   } catch (err) {
     return { success: false, message: 'Failed to send SMS' };
   }
+}
+
+export async function getUserByEmail(email: string) {
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data;
 }

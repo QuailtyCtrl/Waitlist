@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, MessageSquare, Check, ChevronRight } from 'lucide-react';
+import { Mail, MessageSquare, Check, ChevronRight, ArrowRight } from 'lucide-react';
 import { verifyEmailCode, verifySmsCode, updateTierBasedOnVerification } from '../lib/verification';
 import { EmailVerification } from './EmailVerification';
 import { SmsVerification } from './SmsVerification';
@@ -14,17 +14,18 @@ export function VerificationFlow({ email, phone, onComplete }: VerificationFlowP
   const [emailVerified, setEmailVerified] = useState(false);
   const [smsVerified, setSmsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+  const hasPhone = phone && phone.trim() !== '';
 
   useEffect(() => {
-    if (emailVerified && smsVerified) {
+    if (emailVerified && (smsVerified || !hasPhone)) {
       setLoading(true);
-      updateTierBasedOnVerification(email).then(() => {
+      updateTierBasedOnVerification(email, !hasPhone).then(() => {
         setTimeout(() => {
           onComplete();
         }, 1000);
       });
     }
-  }, [emailVerified, smsVerified, email, onComplete]);
+  }, [emailVerified, smsVerified, hasPhone, email, onComplete]);
 
   const handleEmailVerify = async (code: string) => {
     const result = await verifyEmailCode(email, code);
@@ -44,25 +45,36 @@ export function VerificationFlow({ email, phone, onComplete }: VerificationFlowP
     return false;
   };
 
+  const handleSkipSms = () => {
+    setLoading(true);
+    updateTierBasedOnVerification(email, true).then(() => {
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-8">
-        <div className={`flex items-center gap-2 ${emailVerified ? 'opacity-100' : 'opacity-60'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all ${emailVerified ? 'bg-emerald-600' : 'bg-gray-400'}`}>
-            {emailVerified ? <Check className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
+      {hasPhone && (
+        <div className="flex justify-between items-center mb-8">
+          <div className={`flex items-center gap-2 ${emailVerified ? 'opacity-100' : 'opacity-60'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all ${emailVerified ? 'bg-emerald-600' : 'bg-gray-400'}`}>
+              {emailVerified ? <Check className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
+            </div>
+            <span className="text-sm font-medium">Email</span>
           </div>
-          <span className="text-sm font-medium">Email</span>
-        </div>
 
-        <div className="flex-1 h-px bg-gray-200 mx-4" />
+          <div className="flex-1 h-px bg-gray-200 mx-4" />
 
-        <div className={`flex items-center gap-2 ${smsVerified ? 'opacity-100' : 'opacity-60'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all ${smsVerified ? 'bg-emerald-600' : 'bg-gray-400'}`}>
-            {smsVerified ? <Check className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
+          <div className={`flex items-center gap-2 ${smsVerified ? 'opacity-100' : 'opacity-60'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-all ${smsVerified ? 'bg-emerald-600' : 'bg-gray-400'}`}>
+              {smsVerified ? <Check className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
+            </div>
+            <span className="text-sm font-medium">SMS</span>
           </div>
-          <span className="text-sm font-medium">SMS</span>
         </div>
-      </div>
+      )}
 
       {!emailVerified ? (
         <EmailVerification email={email} onVerify={handleEmailVerify} />
@@ -73,14 +85,26 @@ export function VerificationFlow({ email, phone, onComplete }: VerificationFlowP
         </div>
       )}
 
-      {!smsVerified ? (
-        <SmsVerification phone={phone} onVerify={handleSmsVerify} />
-      ) : (
+      {hasPhone && !smsVerified ? (
+        <>
+          <SmsVerification phone={phone} onVerify={handleSmsVerify} />
+          {emailVerified && (
+            <button
+              onClick={handleSkipSms}
+              disabled={loading}
+              className="w-full py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 group"
+            >
+              Continue without SMS
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
+        </>
+      ) : hasPhone && smsVerified ? (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 animate-slideDown">
           <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
           <span className="text-sm text-green-700">SMS verified</span>
         </div>
-      )}
+      ) : null}
 
       {loading && (
         <div className="flex items-center justify-center py-4">
