@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { resendSmsCode } from '../lib/verification';
 
 interface SmsVerificationProps {
   phone: string;
@@ -10,7 +11,17 @@ export function SmsVerification({ phone, onVerify }: SmsVerificationProps) {
   const [codes, setCodes] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(60);
+  const [successMessage, setSuccessMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -62,6 +73,27 @@ export function SmsVerification({ phone, onVerify }: SmsVerificationProps) {
     }
   };
 
+  const handleResend = async () => {
+    setResending(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const result = await resendSmsCode(phone);
+      if (result.success) {
+        setSuccessMessage(result.message);
+        setCooldown(60);
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError('Failed to resend code');
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <div className="space-y-4 animate-slideDown">
       <div>
@@ -99,12 +131,28 @@ export function SmsVerification({ phone, onVerify }: SmsVerificationProps) {
           </div>
         )}
 
+        {successMessage && (
+          <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded mb-4 animate-slideDown">
+            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-green-700">{successMessage}</p>
+          </div>
+        )}
+
         <button
           onClick={() => handleVerify()}
           disabled={loading || codes.join('').length !== 6}
           className="w-full py-2 bg-black text-white text-sm font-medium uppercase tracking-widest hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Verifying...' : 'Verify SMS'}
+        </button>
+
+        <button
+          onClick={handleResend}
+          disabled={resending || cooldown > 0}
+          className="w-full py-2 mt-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium uppercase tracking-widest hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
+          {resending ? 'Resending...' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend Code'}
         </button>
       </div>
     </div>

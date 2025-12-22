@@ -226,3 +226,144 @@ export async function getUserStats(email: string) {
     position: (count || 0) + 1,
   };
 }
+
+export async function resendEmailCode(
+  email: string
+): Promise<{ success: boolean; message: string; cooldownRemaining?: number }> {
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select('email_code_last_sent_at')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, message: 'Email not found' };
+  }
+
+  if (data.email_code_last_sent_at) {
+    const lastSentAt = new Date(data.email_code_last_sent_at);
+    const now = new Date();
+    const secondsSinceLastSent = (now.getTime() - lastSentAt.getTime()) / 1000;
+    const cooldownSeconds = 60;
+
+    if (secondsSinceLastSent < cooldownSeconds) {
+      const remaining = Math.ceil(cooldownSeconds - secondsSinceLastSent);
+      return {
+        success: false,
+        message: `Please wait ${remaining} seconds before resending`,
+        cooldownRemaining: remaining,
+      };
+    }
+  }
+
+  const newCode = generateVerificationCode();
+  const now = new Date();
+  const expiresIn15Min = new Date(now.getTime() + 15 * 60000);
+
+  const { error: updateError } = await supabase
+    .from('waitlist')
+    .update({
+      email_verification_code: newCode,
+      email_verification_code_expires_at: expiresIn15Min.toISOString(),
+      email_code_last_sent_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq('email', email.toLowerCase());
+
+  if (updateError) {
+    return { success: false, message: 'Failed to generate new code' };
+  }
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send_email_verification`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: email.toLowerCase(), code: newCode }),
+      }
+    );
+
+    if (!response.ok) {
+      return { success: false, message: 'Failed to send email' };
+    }
+
+    return { success: true, message: 'Verification code resent to your email' };
+  } catch (err) {
+    return { success: false, message: 'Failed to send email' };
+  }
+}
+
+export async function resendSmsCode(
+  phone: string
+): Promise<{ success: boolean; message: string; cooldownRemaining?: number }> {
+  const normalizedPhone = normalizePhone(phone);
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select('sms_code_last_sent_at')
+    .eq('phone', normalizedPhone)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, message: 'Phone number not found' };
+  }
+
+  if (data.sms_code_last_sent_at) {
+    const lastSentAt = new Date(data.sms_code_last_sent_at);
+    const now = new Date();
+    const secondsSinceLastSent = (now.getTime() - lastSentAt.getTime()) / 1000;
+    const cooldownSeconds = 60;
+
+    if (secondsSinceLastSent < cooldownSeconds) {
+      const remaining = Math.ceil(cooldownSeconds - secondsSinceLastSent);
+      return {
+        success: false,
+        message: `Please wait ${remaining} seconds before resending`,
+        cooldownRemaining: remaining,
+      };
+    }
+  }
+
+  const newCode = generateVerificationCode();
+  const now = new Date();
+  const expiresIn15Min = new Date(now.getTime() + 15 * 60000);
+
+  const { error: updateError } = await supabase
+    .from('waitlist')
+    .update({
+      sms_verification_code: newCode,
+      sms_verification_code_expires_at: expiresIn15Min.toISOString(),
+      sms_code_last_sent_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq('phone', normalizedPhone);
+
+  if (updateError) {
+    return { success: false, message: 'Failed to generate new code' };
+  }
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send_sms_verification`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ phone: normalizedPhone, code: newCode }),
+      }
+    );
+
+    if (!response.ok) {
+      return { success: false, message: 'Failed to send SMS' };
+    }
+
+    return { success: true, message: 'Verification code resent to your phone' };
+  } catch (err) {
+    return { success: false, message: 'Failed to send SMS' };
+  }
+}
