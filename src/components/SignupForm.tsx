@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { createWaitlistEntry, checkDuplicateEmail, checkDuplicatePhone, generateVerificationCode, normalizePhone } from '../lib/verification';
 
@@ -12,6 +12,15 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+    }
+  }, []);
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -78,7 +87,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       const emailCode = generateVerificationCode();
       const smsCode = generateVerificationCode();
 
-      await createWaitlistEntry(email, phone, emailCode, smsCode);
+      await createWaitlistEntry(email, phone, emailCode, smsCode, referralCode || undefined);
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -135,7 +144,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         <div className="flex justify-center mb-4">
           <CheckCircle className="w-12 h-12 text-emerald-600" />
         </div>
-        <h3 className="text-xl font-light text-center mb-2">Welcome to ELEVATE</h3>
+        <h3 className="text-xl font-light text-center mb-2">Welcome to <span className="brand-nervont">Nervont</span></h3>
         <p className="text-gray-600 text-center text-sm">
           Check your email{phone ? ' and text message' : ''} for verification code{phone ? 's' : ''}. You're almost there!
         </p>

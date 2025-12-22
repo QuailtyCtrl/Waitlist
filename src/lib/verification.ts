@@ -514,6 +514,7 @@ export async function verifyLoginCode(
     .update({
       email_verification_code: null,
       email_verification_code_expires_at: null,
+      email_verified: true,
       updated_at: new Date().toISOString(),
     })
     .eq('email', email.toLowerCase());
