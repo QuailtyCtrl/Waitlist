@@ -18,9 +18,9 @@ interface LeaderboardProps {
 }
 
 const tierColors = {
-  bronze: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  silver: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-  gold: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  bronze: { bg: 'bg-white', text: 'text-gray-700', border: 'border-gray-200' },
+  silver: { bg: 'bg-white', text: 'text-gray-700', border: 'border-gray-200' },
+  gold: { bg: 'bg-white', text: 'text-gray-700', border: 'border-gray-200' },
   platinum: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300' },
 };
 
