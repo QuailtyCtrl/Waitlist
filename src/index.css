@@ -36,6 +36,8 @@
   }
 
   .tier-bronze {
+    position: relative;
+    display: inline-block;
     background: linear-gradient(90deg, #8B4513 0%, #CD853F 25%, #FFE4B5 50%, #CD853F 75%, #8B4513 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
@@ -43,40 +45,46 @@
     background-clip: text;
     font-weight: 700;
     animation: tierShimmer 2s ease-in-out infinite;
-    text-shadow: 0 0 8px rgba(205, 133, 63, 0.4);
+    filter: drop-shadow(0 0 4px rgba(205, 133, 63, 0.6));
   }
 
   .tier-silver {
-    background: linear-gradient(90deg, #6B7280 0%, #C0C0C0 25%, #F8F9FA 50%, #C0C0C0 75%, #6B7280 100%);
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(90deg, #6B7280 0%, #C0C0C0 25%, #FFFFFF 50%, #C0C0C0 75%, #6B7280 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
     animation: tierShimmer 2s ease-in-out infinite;
-    text-shadow: 0 0 8px rgba(192, 192, 192, 0.4);
+    filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.8));
   }
 
   .tier-gold {
-    background: linear-gradient(90deg, #B8860B 0%, #FFD700 20%, #FFF8DC 40%, #FFED4E 50%, #FFF8DC 60%, #FFD700 80%, #B8860B 100%);
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(90deg, #B8860B 0%, #FFD700 20%, #FFFACD 40%, #FFED4E 50%, #FFFACD 60%, #FFD700 80%, #B8860B 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
     animation: tierShimmer 2s ease-in-out infinite;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8));
   }
 
   .tier-platinum {
-    background: linear-gradient(90deg, #8B9DC3 0%, #DFE3EE 20%, #FFFFFF 40%, #E8F0FE 50%, #FFFFFF 60%, #DFE3EE 80%, #8B9DC3 100%);
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(90deg, #8B9DC3 0%, #C0D4F5 20%, #FFFFFF 40%, #E8F4FF 50%, #FFFFFF 60%, #C0D4F5 80%, #8B9DC3 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
     animation: tierShimmer 1.5s ease-in-out infinite;
-    text-shadow: 0 0 12px rgba(139, 157, 195, 0.6);
+    filter: drop-shadow(0 0 8px rgba(139, 157, 195, 0.9));
   }
 }
 

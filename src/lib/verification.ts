@@ -174,7 +174,7 @@ async function getUserPosition(email: string): Promise<number | null> {
   const { count } = await supabase
     .from('waitlist')
     .select('id', { count: 'exact' })
-    .gt('created_at', data.created_at);
+    .lt('created_at', data.created_at);
 
   return (count || 0) + 1;
 }
@@ -272,7 +272,7 @@ export async function getUserStats(email: string) {
   const { count } = await supabase
     .from('waitlist')
     .select('id', { count: 'exact' })
-    .gt('created_at', data.created_at);
+    .lt('created_at', data.created_at);
 
   return {
     ...data,
