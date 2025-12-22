@@ -20,7 +20,7 @@ This repository powers the waitlist for a luxury streetwear brand — designed t
 
 ## For developers
 
-Keep it small and focused — this repo is intended as a lightweight waitlist site. Check package.json or the project scripts for local start instructions. If you need help wiring a specific backend (email provider, CRM or analytics), open an issue describing the integration.
+This repo is intended as a lightweight waitlist site. Check package.json or the project scripts for local start instructions. If you need help wiring a specific backend (email provider, CRM or analytics), open an issue describing the integration.
 
 ## Contributing
 
@@ -28,12 +28,10 @@ Small PRs welcomed: fixes to copy, styles, or accessibility improvements.
 
 ## License
 
-Open or private — set a license that matches your brand's release strategy.
+Private
 
 ## Contact
 
 Owner: Nervont
 
 ---
-
-If you'd like a different tone (edgy, luxe, formal) or shorter/longer copy, tell me which direction and I will update the README.
