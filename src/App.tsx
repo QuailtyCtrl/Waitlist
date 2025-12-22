@@ -137,7 +137,7 @@ function App() {
       </div>
 
       <footer className="border-t border-gray-200 py-6 px-4 text-center text-xs text-gray-600">
-        <p>© 2025 <span className="brand-nervont">NERVONT</span> APPAREL. All rights reserved. | <span className="brand-nervont">Nervont</span> LC</p>
+        <p>© 2025 NERVONT APPAREL. All rights reserved. | Nervont LC</p>
       </footer>
     </div>
   );
