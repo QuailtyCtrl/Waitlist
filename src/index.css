@@ -37,46 +37,46 @@
 
   .tier-bronze {
     background: linear-gradient(90deg, #8B4513 0%, #CD853F 25%, #FFE4B5 50%, #CD853F 75%, #8B4513 100%);
-    background-size: 300% auto;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
-    animation: shimmer 3s linear infinite;
-    filter: drop-shadow(0 0 8px rgba(205, 133, 63, 0.4));
+    animation: tierShimmer 2s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(205, 133, 63, 0.4);
   }
 
   .tier-silver {
     background: linear-gradient(90deg, #6B7280 0%, #C0C0C0 25%, #F8F9FA 50%, #C0C0C0 75%, #6B7280 100%);
-    background-size: 300% auto;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
-    animation: shimmer 3s linear infinite;
-    filter: drop-shadow(0 0 8px rgba(192, 192, 192, 0.4));
+    animation: tierShimmer 2s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(192, 192, 192, 0.4);
   }
 
   .tier-gold {
     background: linear-gradient(90deg, #B8860B 0%, #FFD700 20%, #FFF8DC 40%, #FFED4E 50%, #FFF8DC 60%, #FFD700 80%, #B8860B 100%);
-    background-size: 300% auto;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
-    animation: shimmer 3s linear infinite;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+    animation: tierShimmer 2s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   }
 
   .tier-platinum {
     background: linear-gradient(90deg, #8B9DC3 0%, #DFE3EE 20%, #FFFFFF 40%, #E8F0FE 50%, #FFFFFF 60%, #DFE3EE 80%, #8B9DC3 100%);
-    background-size: 300% auto;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
-    animation: shimmer 2.5s linear infinite;
-    filter: drop-shadow(0 0 12px rgba(139, 157, 195, 0.6));
+    animation: tierShimmer 1.5s ease-in-out infinite;
+    text-shadow: 0 0 12px rgba(139, 157, 195, 0.6);
   }
 }
 
@@ -129,6 +129,18 @@
     }
     100% {
       background-position: 1000px 0;
+    }
+  }
+
+  @keyframes tierShimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    50% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
     }
   }
 

@@ -124,12 +124,12 @@ export function Leaderboard({ userEmail, userPosition }: LeaderboardProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="text-lg font-light w-8 text-right">
-                    {index + 1 === 1 ? (
+                    {entry.position === 1 ? (
                       <Crown className="w-5 h-5 text-yellow-600" />
                     ) : isTop5 ? (
-                      <span className="text-yellow-700 font-bold">#{index + 1}</span>
+                      <span className="text-yellow-700 font-bold">#{entry.position}</span>
                     ) : (
-                      <span className="text-gray-600">#{index + 1}</span>
+                      <span className="text-gray-600">#{entry.position}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

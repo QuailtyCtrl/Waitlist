@@ -249,7 +249,7 @@ export async function getLeaderboard(limit: number = 50) {
       'id, email, tier, referral_count, created_at',
       { count: 'exact' }
     )
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
     .limit(limit);
 
   if (error) throw error;
