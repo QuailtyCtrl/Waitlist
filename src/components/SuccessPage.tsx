@@ -65,7 +65,7 @@ export function SuccessPage({ email }: SuccessPageProps) {
           </div>
         </div>
         <h2 className="text-2xl font-light">You're In!</h2>
-        <p className="text-gray-600">Welcome to the ELEVATE early access program</p>
+        <p className="text-gray-600">Welcome to the Nervont early access program.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 py-6 px-4 bg-gray-50 rounded border border-gray-200">
