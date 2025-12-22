@@ -485,7 +485,16 @@ export async function sendLoginCode(email: string): Promise<{ success: boolean; 
 export async function verifyLoginCode(
   email: string,
   code: string
-): Promise<{ success: boolean; message: string }> {
+): Promise<{
+  success: boolean;
+  message: string;
+  user?: {
+    email: string;
+    phone: string;
+    email_verified: boolean;
+    sms_verified: boolean;
+  }
+}> {
   const { data, error } = await supabase
     .from('waitlist')
     .select('email_verification_code, email_verification_code_expires_at')
@@ -509,7 +518,7 @@ export async function verifyLoginCode(
     return { success: false, message: 'Invalid login code' };
   }
 
-  const { error: updateError } = await supabase
+  const { data: updatedUser, error: updateError } = await supabase
     .from('waitlist')
     .update({
       email_verification_code: null,
@@ -517,11 +526,22 @@ export async function verifyLoginCode(
       email_verified: true,
       updated_at: new Date().toISOString(),
     })
-    .eq('email', email.toLowerCase());
+    .eq('email', email.toLowerCase())
+    .select('email, phone, email_verified, sms_verified')
+    .single();
 
-  if (updateError) {
+  if (updateError || !updatedUser) {
     return { success: false, message: 'Failed to verify login code' };
   }
 
-  return { success: true, message: 'Login successful' };
+  return {
+    success: true,
+    message: 'Login successful',
+    user: {
+      email: updatedUser.email,
+      phone: updatedUser.phone || '',
+      email_verified: updatedUser.email_verified,
+      sms_verified: updatedUser.sms_verified,
+    }
+  };
 }
