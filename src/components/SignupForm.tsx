@@ -85,7 +85,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         ? `+1${phone.replace(/\D/g, '')}`
         : `+${phone.replace(/\D/g, '')}`;
 
-      await Promise.all([
+      const [emailResponse, smsResponse] = await Promise.all([
         fetch(`${supabaseUrl}/functions/v1/send_email_verification`, {
           method: 'POST',
           headers: {
@@ -103,6 +103,13 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           body: JSON.stringify({ phone: phoneWithCountry, code: smsCode }),
         }),
       ]);
+
+      if (!emailResponse.ok || !smsResponse.ok) {
+        console.error('Verification service error:', {
+          email: !emailResponse.ok ? await emailResponse.text() : 'ok',
+          sms: !smsResponse.ok ? await smsResponse.text() : 'ok',
+        });
+      }
 
       setSuccess(true);
       onSuccess(email, phone);
