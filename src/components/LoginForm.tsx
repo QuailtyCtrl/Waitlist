@@ -188,7 +188,7 @@ export function LoginForm({ onLoginSuccess, onBackToSignup }: LoginFormProps) {
                   value={code}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-10 h-12 text-center text-lg font-semibold border border-gray-300 rounded focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
+                  className="w-10 h-12 text-center text-lg font-semibold text-black bg-white border border-gray-300 rounded focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-colors"
                   disabled={loading}
                   placeholder="-"
                   autoFocus={index === 0}
