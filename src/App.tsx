@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { SignupForm } from './components/SignupForm';
 import { LoginForm } from './components/LoginForm';
 import { VerificationFlow } from './components/VerificationFlow';
@@ -132,6 +133,7 @@ function App() {
       <footer className="border-t border-gray-200 py-6 px-4 text-center text-xs text-gray-600">
         <p>© 2025 NERVONT APPAREL. All rights reserved. | Nervont LC</p>
       </footer>
+      <Analytics />
     </div>
   );
 }
